@@ -1,0 +1,16 @@
+# Sistema operativo y editores
+.DS_Store
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Archivos que generan los laboratorios si se ejecutan dentro del repo
+env.sh
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
