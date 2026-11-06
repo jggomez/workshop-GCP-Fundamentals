@@ -35,6 +35,9 @@ workshop-gcp/
 ├── 08-monitoreo-observabilidad-iac/
 │   ├── teoria.md                                          # Playbook 08: Principios SRE, Cloud Logging, Cloud Monitoring y Terraform (IaC)
 │   └── laboratorio.md                                     # Lab 08: Despliegue declarativo con Terraform, logs JSON, métricas, sinks y Uptime Checks
+├── 09-almacenamiento-analitico-bigquery/
+│   ├── teoria.md                                          # Playbook 09: Dremel, Colossus, Capacitor, On-demand vs Editions, particiones, Iceberg y vistas
+│   └── laboratorio.md                                     # Lab 09: Optimización de costos, FinOps, Apache Iceberg, vistas autorizadas y materializadas
 └── tools/
     └── validate_labs.py                                   # Validador automático de los comandos gcloud de todos los laboratorios
 ```
@@ -46,9 +49,9 @@ Cada carpeta de módulo contiene dos archivos fundamentales:
 
 ---
 
-## Mapa del Curso (Clases 01 a 08 Completadas + Siguientes Módulos)
+## Mapa del Curso (Clases 01 a 09 Completadas + Siguientes Módulos)
 
-A continuación se presenta la ruta oficial del curso con los **8 módulos iniciales listos para dictar**:
+A continuación se presenta la ruta oficial del curso con los **9 módulos iniciales listos para dictar**:
 
 | Clase | Módulo / Tema | Enfoque Principal | Estado |
 | :--- | :--- | :--- | :--- |
@@ -60,7 +63,8 @@ A continuación se presenta la ruta oficial del curso con los **8 módulos inici
 | **06** | **[Orquestación de Contenedores con GKE](./06-orquestacion-contenedores-gke/)** | Arquitectura Kubernetes, GKE Autopilot vs Standard, Pods, Deployments, Services, Secrets, Ingress y HPA | ✅ Disponible ([Teoría](./06-orquestacion-contenedores-gke/teoria.md) \| [Lab](./06-orquestacion-contenedores-gke/laboratorio.md)) |
 | **07** | **[Almacenamiento de Objetos y Bases de Datos](./07-almacenamiento-objetos-bases-datos/)** | Cloud Storage (clases, versionado, lifecycle), Cloud SQL (PostgreSQL) y Cloud Firestore (NoSQL) | ✅ Disponible ([Teoría](./07-almacenamiento-objetos-bases-datos/teoria.md) \| [Lab](./07-almacenamiento-objetos-bases-datos/laboratorio.md)) |
 | **08** | **[Monitoreo, Observabilidad e IaC](./08-monitoreo-observabilidad-iac/)** | Principios de observabilidad (SRE), Cloud Logging, Cloud Monitoring, Uptime Checks y Terraform (IaC) | ✅ Disponible ([Teoría](./08-monitoreo-observabilidad-iac/teoria.md) \| [Lab](./08-monitoreo-observabilidad-iac/laboratorio.md)) |
-| **09–16** | **Módulos Avanzados y Especialización** | Balanceo Global/Cloud Armor, Mensajería (Pub/Sub), Analítica (BigQuery), Pipelines de Datos, IA Generativa (Vertex AI) y Proyecto Final | Próximamente |
+| **09** | **[Almacenamiento Analítico con BigQuery](./09-almacenamiento-analitico-bigquery/)** | Arquitectura Dremel + Colossus, Capacitor, On-demand vs Editions, particionamiento, clusterización, Apache Iceberg, vistas autorizadas y materializadas | ✅ Disponible ([Teoría](./09-almacenamiento-analitico-bigquery/teoria.md) \| [Lab](./09-almacenamiento-analitico-bigquery/laboratorio.md)) |
+| **10–16** | **Módulos Avanzados y Especialización** | Balanceo Global/Cloud Armor, Mensajería (Pub/Sub), Pipelines de Datos, IA Generativa (Vertex AI) y Proyecto Final | Próximamente |
 
 ---
 
@@ -121,6 +125,9 @@ El validador:
 1. Revisa la sintaxis bash de todos los bloques de código (`bash -n`).
 2. Extrae cada comando `gcloud` de los laboratorios y comprueba que el comando exista y que sus flags estén documentados en `gcloud ... --help`.
 3. Ejecuta cada comando contra un **proyecto inexistente**: gcloud valida los argumentos localmente y la API responde 403/404, así que solo se reportan errores de sintaxis o de valores (por ejemplo, `unrecognized arguments`).
+
+> [!NOTE]
+> El validador solo comprueba comandos `gcloud`: **no revisa `bq` ni SQL**, que son la base del Laboratorio 09. Ese laboratorio solo se valida con una corrida real.
 
 **Recomendación**: ejecuta el validador después de actualizar gcloud (`gcloud components update`) y, al menos una vez por trimestre, realiza una corrida completa real de cada laboratorio en un proyecto de prueba, ya que el validador no puede comprobar el comportamiento de los servicios en ejecución (tiempos de propagación, autoescalado, precios).
 
