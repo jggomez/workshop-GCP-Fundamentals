@@ -63,8 +63,6 @@ terraform -version
 # Si no se encuentra instalado, sigue los pasos de la fuente oficial para instalar con el package manager en Linux
 https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/install-cli
 
-<img width="825" height="706" alt="Screenshot 2026-11-07 at 10 50 44 a m" src="https://github.com/user-attachments/assets/323f83ca-ce46-4443-a556-fe94d9db529d" />
-
 # Abre una nueva sesión ya sea cerrando el Cloud Shell y abriéndolo de nuevo o un nuevo tab
 
 # Guardar las variables del laboratorio en ../env.sh (fuera de la carpeta de Terraform)
@@ -85,6 +83,10 @@ gcloud services enable \
 
 echo "Entorno listo en el proyecto: $PROJECT_ID"
 ```
+---
+
+### Install Terraform 
+<img width="825" height="706" alt="Screenshot 2026-11-07 at 10 50 44 a m" src="https://github.com/user-attachments/assets/323f83ca-ce46-4443-a556-fe94d9db529d" />
 
 > [!IMPORTANT]
 > Si Cloud Shell se desconecta (40 minutos de inactividad), recupera tus variables con: `cd ~/workshop-gcp/lab08/terraform-gcp && source ../env.sh`. El estado de Terraform (`terraform.tfstate`) vive en esa carpeta dentro de tu `$HOME` persistente, así que `terraform destroy` seguirá funcionando.
