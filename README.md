@@ -37,7 +37,7 @@ workshop-gcp/
 │   └── laboratorio.md                                     # Lab 08: Despliegue declarativo con Terraform, logs JSON, métricas, sinks y Uptime Checks
 ├── 09-almacenamiento-analitico-bigquery/
 │   ├── teoria.md                                          # Playbook 09: Dremel, Colossus, Capacitor, On-demand vs Editions, particiones, Iceberg y vistas
-│   └── laboratorio.md                                     # Lab 09: Optimización de costos, FinOps, Apache Iceberg, vistas autorizadas y materializadas
+│   └── laboratorio.md                                     # Lab 09: Optimización de costos, FinOps, Apache Iceberg y vistas materializadas
 └── tools/
     └── validate_labs.py                                   # Validador automático de los comandos gcloud de todos los laboratorios
 ```

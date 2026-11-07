@@ -1,6 +1,6 @@
-# Laboratorio 09: Data Warehousing Moderno con BigQuery — Optimización de Costos, Apache Iceberg, Vistas Autorizadas y Vistas Materializadas
+# Laboratorio 09: Data Warehousing Moderno con BigQuery — Optimización de Costos, Apache Iceberg y Vistas Materializadas
 
-- **Duración estimada**: 85–90 minutos
+- **Duración estimada**: 75–80 minutos
 - **Nivel**: Intermedio / Analítica de Datos y FinOps
 - **Entorno de trabajo**: **Google Cloud Shell (`bq`, `gcloud`, `python3`)** + Verificaciones visuales en **BigQuery Studio**
 
@@ -13,7 +13,7 @@ Construir un pequeño Data Warehouse a partir de **36 millones de viajes reales 
 2. **Particionamiento y clusterización**: reducir los bytes procesados por la misma consulta.
 3. **FinOps**: poner topes de gasto y comparar on-demand frente al costo equivalente en slots, sin crear reservaciones.
 4. **Lakehouse**: crear una tabla **Apache Iceberg** en tu propio bucket y leer un snapshot desde una tabla externa.
-5. **Compartir y acelerar**: exponer datos a un socio con una **Vista Autorizada** y acelerar reportes con una **Vista Materializada**.
+5. **Acelerar reportes**: precalcular resultados con una **Vista Materializada**.
 
 ---
 
@@ -24,8 +24,7 @@ Al finalizar este laboratorio, serás capaz de:
 2. Crear tablas **particionadas y clusterizadas** con `CREATE TABLE ... AS SELECT` y exigir filtros con `require_partition_filter`.
 3. Limitar el gasto con `--maximum_bytes_billed` y auditar consumo con `INFORMATION_SCHEMA.JOBS_BY_USER`.
 4. Crear una **conexión `CLOUD_RESOURCE`**, una tabla **Iceberg administrada** y una tabla **Iceberg externa** de solo lectura.
-5. Autorizar una vista sobre un dataset privado y comprobar el aislamiento con una **Cuenta de Servicio** suplantada.
-6. Crear una **Vista Materializada** y verificar que BigQuery reescribe automáticamente las consultas para usarla.
+5. Crear una **Vista Materializada** y verificar que BigQuery reescribe automáticamente las consultas para usarla.
 
 ---
 
@@ -40,7 +39,7 @@ Al finalizar este laboratorio, serás capaz de:
 | **Almacenamiento BigQuery** | 2 tablas de ~7.5 GB durante ~2 horas | Primeros **10 GiB/mes gratis**; luego ~$0.023 / GiB / mes | **< $0.01 USD** |
 | **Cloud Storage** | Bucket `us-central1` con ~25 MB durante ~1 hora | Primeros 5 GB/mes gratis en Free Tier | **$0.00 USD** |
 | **`EXPORT TABLE METADATA`** | 1 operación en slots Enterprise pay-as-you-go | $0.06 / slot-hora | **< $0.01 USD** |
-| **Conexión y Cuenta de Servicio** | 1 de cada una | Sin costo | **$0.00 USD** |
+| **Conexión** | 1 conexión `CLOUD_RESOURCE` | Sin costo | **$0.00 USD** |
 | **TOTAL ESTIMADO** | **Ejecutando la limpieza al finalizar** | — | **~$0.00 a $0.11 USD** |
 
 ---
@@ -68,13 +67,10 @@ export PROJECT_ID="$PROJECT_ID"
 export REGION="us-central1"
 export BQ_LOCATION="US"
 export DS_PRIVADO="lab09_privado"
-export DS_COMPARTIDO="lab09_compartido"
 export FUENTE="bigquery-public-data.new_york_taxi_trips.tlc_yellow_trips_2022"
 export BUCKET_NAME="gs://${PROJECT_ID}-lakehouse-lab09"
 export ICEBERG_URI="gs://${PROJECT_ID}-lakehouse-lab09/iceberg/viajes_enero"
 export CONNECTION_ID="conn-lakehouse-lab09"
-export SA_EMAIL="sa-socio-lab09@${PROJECT_ID}.iam.gserviceaccount.com"
-export USER_EMAIL="$(gcloud config get-value account 2>/dev/null)"
 EOF
 
 # bqsql: ejecuta SQL sin caché, con etiqueta y con un tope de 20 GB por consulta
@@ -101,12 +97,11 @@ echo "Proyecto activo: $PROJECT_ID | BigQuery: $BQ_LOCATION | Bucket: $REGION"
 > [!IMPORTANT]
 > Si Cloud Shell se desconecta (40 minutos de inactividad), recupera tus variables con: `cd ~/workshop-gcp/lab09 && source env.sh`
 
-Ahora crea los dos datasets y el bucket:
+Ahora crea el dataset y el bucket:
 
 ```bash
-# Dataset con los datos completos y dataset que se compartirá
+# Dataset que alojará las tablas del laboratorio
 bq --location=$BQ_LOCATION mk --dataset --description="Lab 09: datos internos" $PROJECT_ID:$DS_PRIVADO
-bq --location=$BQ_LOCATION mk --dataset --description="Lab 09: vistas para socios" $PROJECT_ID:$DS_COMPARTIDO
 
 # Bucket para Iceberg, sin borrado suave para no pagar por objetos eliminados
 gcloud storage buckets create $BUCKET_NAME \
@@ -118,7 +113,7 @@ bq ls
 ```
 
 > [!WARNING]
-> **¿Por qué `US` y no `us-central1`?** Los datasets públicos de BigQuery están en la multirregión `US`, y una consulta no puede combinar datasets de ubicaciones distintas. Si creas tus datasets en `us-central1`, verás `Not found: Dataset ... was not found in location`. El bucket sí puede estar en `us-central1`, porque esa región forma parte de la multirregión US.
+> **¿Por qué `US` y no `us-central1`?** Los datasets públicos de BigQuery están en la multirregión `US`, y una consulta no puede combinar datasets de ubicaciones distintas. Si creas tu dataset en `us-central1`, verás `Not found: Dataset ... was not found in location`. El bucket sí puede estar en `us-central1`, porque esa región forma parte de la multirregión US.
 
 ---
 
@@ -411,117 +406,11 @@ Ahora la externa tiene **una fila menos**: apunta a un snapshot fijo y debes act
 
 ---
 
-### Paso 6: Vista Autorizada para un Socio Externo (10 min)
-
-El proveedor con `vendor_id = '2'` quiere analizar **solo sus viajes**, sin ver propinas ni montos, y sin acceso a la tabla interna. Lo representaremos con una Cuenta de Servicio.
-
-#### 6.1. Crear la Vista en el Dataset Compartido
-
-```bash
-source env.sh
-
-bqsql paso6-vista << SQL
-CREATE OR REPLACE VIEW $DS_COMPARTIDO.v_viajes_socio AS
-SELECT pickup_datetime, pickup_location_id, dropoff_location_id, trip_distance, passenger_count
-FROM $DS_PRIVADO.viajes_part_cluster
-WHERE vendor_id = '2';
-SQL
-```
-
-#### 6.2. Autorizar la Vista sobre el Dataset Privado
-La autorización vive en la lista de acceso del **dataset fuente**. Agregaremos a esa lista una entrada `view` conservando las existentes:
-
-```bash
-bq --format=prettyjson show $PROJECT_ID:$DS_PRIVADO > acceso_privado.json
-
-python3 - << EOF
-import json
-with open("acceso_privado.json") as f:
-    dataset = json.load(f)
-dataset["access"].append({"view": {
-    "projectId": "$PROJECT_ID",
-    "datasetId": "$DS_COMPARTIDO",
-    "tableId": "v_viajes_socio"
-}})
-with open("acceso_privado.json", "w") as f:
-    json.dump(dataset, f, indent=2)
-EOF
-
-bq update --source acceso_privado.json $PROJECT_ID:$DS_PRIVADO
-bq --format=json show $PROJECT_ID:$DS_PRIVADO | python3 -c "
-import json, sys
-print([e for e in json.load(sys.stdin)['access'] if 'view' in e])"
-```
-
-#### 6.3. Crear la Identidad del Socio
-Recibe acceso **solo** al dataset compartido, más permiso para ejecutar jobs. Tú recibes permiso para suplantarla, como en el Laboratorio 02:
-
-```bash
-gcloud iam service-accounts create sa-socio-lab09 --display-name="Socio externo Lab 09"
-
-# Esperar a que la cuenta de servicio esté disponible
-for i in $(seq 1 12); do
-  gcloud iam service-accounts describe $SA_EMAIL > /dev/null 2>&1 && break
-  sleep 5
-done
-
-gcloud projects add-iam-policy-binding $PROJECT_ID \
-  --member="serviceAccount:$SA_EMAIL" --role="roles/bigquery.jobUser" --condition=None --quiet > /dev/null
-
-gcloud iam service-accounts add-iam-policy-binding $SA_EMAIL \
-  --member="user:$USER_EMAIL" --role="roles/iam.serviceAccountTokenCreator" --quiet > /dev/null
-
-bqsql paso6-grant "GRANT \`roles/bigquery.dataViewer\` ON SCHEMA \`$PROJECT_ID\`.$DS_COMPARTIDO
-  TO 'serviceAccount:$SA_EMAIL'"
-```
-
-#### 6.4. Comprobar el Aislamiento
-Consultaremos la API de BigQuery con un token de la Cuenta de Servicio. La consulta a la vista debe funcionar, y la consulta directa a la tabla debe responder **403**. Los permisos pueden tardar unos minutos, así que reintentamos:
-
-```bash
-cat > como_socio.py << 'EOF'
-import json, os, subprocess, sys, urllib.error, urllib.request
-
-token = subprocess.run(
-    ["gcloud", "auth", "print-access-token", f"--impersonate-service-account={os.environ['SA_EMAIL']}"],
-    capture_output=True, text=True, check=True).stdout.strip()
-request = urllib.request.Request(
-    f"https://bigquery.googleapis.com/bigquery/v2/projects/{os.environ['PROJECT_ID']}/queries",
-    data=json.dumps({"query": sys.argv[1], "useLegacySql": False,
-                     "location": os.environ["BQ_LOCATION"], "useQueryCache": False}).encode(),
-    headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"})
-try:
-    with urllib.request.urlopen(request) as response:
-        fila = json.load(response)["rows"][0]["f"]
-        print("OK:", [c["v"] for c in fila])
-except urllib.error.HTTPError as error:
-    print(f"HTTP {error.code}:", json.load(error)["error"]["message"][:120])
-    sys.exit(1)
-EOF
-
-FECHAS="pickup_datetime >= '2022-03-01' AND pickup_datetime < '2022-04-01'"
-
-echo "--- 1. El socio consulta la vista autorizada ---"
-for i in $(seq 1 20); do
-  python3 como_socio.py "SELECT COUNT(*) AS viajes, ROUND(AVG(trip_distance), 2) AS distancia
-    FROM $DS_COMPARTIDO.v_viajes_socio WHERE $FECHAS" && break
-  echo "Intento $i: esperando la propagación de IAM, reintentando en 30 s..."; sleep 30
-done
-
-echo "--- 2. El socio intenta leer la tabla interna (debe fallar con 403) ---"
-python3 como_socio.py "SELECT COUNT(*) FROM $DS_PRIVADO.viajes_part_cluster WHERE $FECHAS"
-```
-
-> [!NOTE]
-> La tabla base exige filtro de partición, y ese requisito también aplica al consultar la vista: por eso el socio incluye `pickup_datetime` en su `WHERE`.
-
----
-
-### Paso 7: Vista Materializada y Smart Tuning (10 min)
+### Paso 6: Vista Materializada y Smart Tuning (10 min)
 
 Gerencia ejecuta a diario un reporte de ingresos por mes y zona, que escanea datos cada vez.
 
-#### 7.1. Medir el Reporte Antes de la Vista
+#### 6.1. Medir el Reporte Antes de la Vista
 
 ```bash
 source env.sh
@@ -534,13 +423,13 @@ WHERE pickup_datetime >= '2022-01-01' AND pickup_datetime < '2023-01-01'
 GROUP BY mes, pickup_location_id
 SQL
 
-bqsql paso7-antes --max_rows=3 < reporte.sql
+bqsql paso6-antes --max_rows=3 < reporte.sql
 ```
 
-#### 7.2. Crear la Vista Materializada
+#### 6.2. Crear la Vista Materializada
 
 ```bash
-bqsql paso7-crear-mv << SQL
+bqsql paso6-crear-mv << SQL
 CREATE MATERIALIZED VIEW $DS_PRIVADO.mv_ingresos_zona
 PARTITION BY TIMESTAMP_TRUNC(mes, MONTH)
 OPTIONS (enable_refresh = TRUE, refresh_interval_minutes = 60)
@@ -553,14 +442,14 @@ GROUP BY mes, pickup_location_id;
 SQL
 
 # Forzar la primera actualización para no esperar al ciclo en segundo plano
-bqsql paso7-refrescar "CALL BQ.REFRESH_MATERIALIZED_VIEW('$PROJECT_ID.$DS_PRIVADO.mv_ingresos_zona')"
+bqsql paso6-refrescar "CALL BQ.REFRESH_MATERIALIZED_VIEW('$PROJECT_ID.$DS_PRIVADO.mv_ingresos_zona')"
 ```
 
-#### 7.3. Repetir el Reporte sin Cambiar el SQL
+#### 6.3. Repetir el Reporte sin Cambiar el SQL
 Ejecutamos **exactamente el mismo archivo**, que sigue apuntando a la tabla base, y revisamos si BigQuery lo reescribió:
 
 ```bash
-bqsql paso7-despues --max_rows=3 < reporte.sql
+bqsql paso6-despues --max_rows=3 < reporte.sql
 
 cat > mv_stats.sql << 'SQL'
 SELECT
@@ -570,21 +459,21 @@ SELECT
         FROM UNNEST(materialized_view_statistics.materialized_view) AS m) AS vistas_evaluadas
 FROM `region-us`.INFORMATION_SCHEMA.JOBS_BY_USER
 WHERE creation_time > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 DAY)
-  AND EXISTS (SELECT 1 FROM UNNEST(labels) WHERE key = 'lab09' AND value IN ('paso7-antes', 'paso7-despues'))
+  AND EXISTS (SELECT 1 FROM UNNEST(labels) WHERE key = 'lab09' AND value IN ('paso6-antes', 'paso6-despues'))
 ORDER BY creation_time;
 SQL
 
 bq --location=$BQ_LOCATION --format=prettyjson query --use_legacy_sql=false < mv_stats.sql
 ```
 
-En `paso7-despues`, la vista aparece con `chosen: true` y los bytes bajan de **1,045 MB a 10.5 MB**, unas 100 veces menos: **el reporte se aceleró sin que nadie modificara su SQL**.
+En `paso6-despues`, la vista aparece con `chosen: true` y los bytes bajan de **1,045 MB a 10.5 MB**, unas 100 veces menos: **el reporte se aceleró sin que nadie modificara su SQL**.
 
 ---
 
 ## 5. Limpieza de Recursos en Google Cloud (Cleanup)
 
 > [!CAUTION]
-> **¡PASO OBLIGATORIO!** Las tablas de BigQuery y los archivos de Cloud Storage cobran por almacenamiento mientras existan. Primero se eliminan los datasets (y con ellos las tablas Iceberg) y después el bucket.
+> **¡PASO OBLIGATORIO!** Las tablas de BigQuery y los archivos de Cloud Storage cobran por almacenamiento mientras existan. Primero se elimina el dataset (y con él las tablas Iceberg) y después el bucket.
 
 Ejecuta los siguientes comandos en **Cloud Shell**:
 
@@ -592,8 +481,7 @@ Ejecuta los siguientes comandos en **Cloud Shell**:
 # 0. Recuperar las variables del laboratorio (por si la sesión de Cloud Shell se reinició)
 cd ~/workshop-gcp/lab09 && source env.sh
 
-# 1. Eliminar ambos datasets con todas sus tablas y vistas
-bq rm -r -f -d $PROJECT_ID:$DS_COMPARTIDO
+# 1. Eliminar el dataset con todas sus tablas y vistas
 bq rm -r -f -d $PROJECT_ID:$DS_PRIVADO
 
 # 2. Eliminar la conexión
@@ -601,18 +489,13 @@ bq rm -f --connection $PROJECT_ID.$BQ_LOCATION.$CONNECTION_ID
 
 # 3. Eliminar el bucket y todos sus objetos
 gcloud storage rm --recursive $BUCKET_NAME
-
-# 4. Retirar el permiso de proyecto y eliminar la Cuenta de Servicio
-gcloud projects remove-iam-policy-binding $PROJECT_ID \
-  --member="serviceAccount:$SA_EMAIL" --role="roles/bigquery.jobUser" --condition=None --quiet > /dev/null
-gcloud iam service-accounts delete $SA_EMAIL --quiet
 ```
 
 ### Auditoría Final de Limpieza
-Verifica que no quede ningún recurso del laboratorio. Las cuatro secciones deben aparecer vacías:
+Verifica que no quede ningún recurso del laboratorio. Las tres secciones deben aparecer vacías:
 
 ```bash
-echo "=== Datasets del Lab 09 ==="
+echo "=== Dataset del Lab 09 ==="
 bq ls | grep lab09
 
 echo "=== Conexiones del Lab 09 ==="
@@ -620,9 +503,6 @@ bq ls --connection --location=$BQ_LOCATION | grep lab09
 
 echo "=== Buckets del Lab 09 ==="
 gcloud storage buckets list --format="value(name)" | grep lab09
-
-echo "=== Cuenta de Servicio del Lab 09 ==="
-gcloud iam service-accounts list --format="value(email)" | grep lab09
 ```
 
 ---
@@ -634,14 +514,14 @@ En este noveno laboratorio has diseñado un Data Warehouse midiendo cada decisi�
 - Con **partición y clúster** redujiste 72 veces los bytes de la misma consulta, y con `require_partition_filter` evitaste escaneos accidentales.
 - Aplicaste **FinOps** con topes de gasto y auditoría en `INFORMATION_SCHEMA`, y comparaste on-demand con slots sin crear reservaciones.
 - Creaste una tabla **Apache Iceberg** en tu propio bucket y entendiste la diferencia entre una tabla administrada y un snapshot externo de solo lectura.
-- Compartiste datos de forma segura con una **Vista Autorizada** y aceleraste un reporte con una **Vista Materializada** sin tocar su SQL.
+- Aceleraste un reporte con una **Vista Materializada** sin tocar su SQL.
 
 ---
 
 ## 7. Retos Prácticos (Challenges)
 
 1. **Reto 1 — Reservación Enterprise Real**:
-   Investiga `bq mk --reservation` con `--edition=ENTERPRISE`, `--slots=0` y `--autoscale_max_slots=50`, junto con `bq mk --reservation_assignment`. Ejecuta el reporte del Paso 7 con esa capacidad y compara `total_slot_ms` con lo que indica la facturación. **Elimina la asignación y la reservación al terminar**: cobran por slot-hora escalado.
+   Investiga `bq mk --reservation` con `--edition=ENTERPRISE`, `--slots=0` y `--autoscale_max_slots=50`, junto con `bq mk --reservation_assignment`. Ejecuta el reporte del Paso 6 con esa capacidad y compara `total_slot_ms` con lo que indica la facturación. **Elimina la asignación y la reservación al terminar**: cobran por slot-hora escalado.
 
 2. **Reto 2 — Orden de las Columnas de Clúster**:
    Crea una tabla igual a `viajes_part_cluster`, pero con `CLUSTER BY payment_type, pickup_location_id`. Ejecuta la consulta del Paso 3.2 en ambas y explica la diferencia de bytes.
@@ -658,6 +538,5 @@ En este noveno laboratorio has diseñado un Data Warehouse midiendo cada decisi�
 - **Vista `INFORMATION_SCHEMA.JOBS`**: [https://docs.cloud.google.com/bigquery/docs/information-schema-jobs](https://docs.cloud.google.com/bigquery/docs/information-schema-jobs)
 - **Tablas Iceberg Administradas**: [https://docs.cloud.google.com/bigquery/docs/biglake-iceberg-tables-in-bigquery](https://docs.cloud.google.com/bigquery/docs/biglake-iceberg-tables-in-bigquery)
 - **Tablas Externas Iceberg**: [https://docs.cloud.google.com/bigquery/docs/iceberg-external-tables](https://docs.cloud.google.com/bigquery/docs/iceberg-external-tables)
-- **Vistas Autorizadas**: [https://docs.cloud.google.com/bigquery/docs/authorized-views](https://docs.cloud.google.com/bigquery/docs/authorized-views)
 - **Vistas Materializadas**: [https://docs.cloud.google.com/bigquery/docs/materialized-views-intro](https://docs.cloud.google.com/bigquery/docs/materialized-views-intro)
 - **Precios de BigQuery**: [https://cloud.google.com/bigquery/pricing](https://cloud.google.com/bigquery/pricing)

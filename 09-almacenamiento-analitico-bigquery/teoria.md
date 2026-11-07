@@ -275,14 +275,14 @@ Una vista normal exige permisos sobre las tablas de origen. Una **vista autoriza
 
 ```mermaid
 flowchart LR
-    Socio["🤝 Socio externo\ndataViewer solo en lab09_compartido"]
+    Socio["🤝 Socio externo\ndataViewer solo en datos_compartidos"]
 
-    subgraph Comp["📂 lab09_compartido"]
-        View["👁️ v_viajes_socio\nSolo su proveedor y sin montos"]
+    subgraph Comp["📂 datos_compartidos"]
+        View["👁️ v_ventas_socio\nSolo su proveedor y sin montos"]
     end
 
-    subgraph Priv["🔒 lab09_privado"]
-        Table["📊 viajes_part_cluster\nDatos completos"]
+    subgraph Priv["🔒 datos_privados"]
+        Table["📊 ventas\nDatos completos"]
     end
 
     Socio -->|"✅ Permitido"| View
