@@ -60,8 +60,10 @@ gcloud config set project $PROJECT_ID
 # Verificar versión de Terraform preinstalada en Cloud Shell
 terraform -version
 
-# Si no se encuentra instalado, sigue los pasos de la fuente oficial
+# Si no se encuentra instalado, sigue los pasos de la fuente oficial para instalar con el package manager en Linux
 https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/install-cli
+
+<img width="825" height="706" alt="Screenshot 2026-11-07 at 10 50 44 a m" src="https://github.com/user-attachments/assets/323f83ca-ce46-4443-a556-fe94d9db529d" />
 
 # Abre una nueva sesión ya sea cerrando el Cloud Shell y abriéndolo de nuevo o un nuevo tab
 
