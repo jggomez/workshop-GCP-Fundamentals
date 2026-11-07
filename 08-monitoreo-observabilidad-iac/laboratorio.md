@@ -55,15 +55,6 @@ if [ -z "$PROJECT_ID" ]; then
   echo "ERROR: No hay proyecto activo. Ejecuta: gcloud config set project TU_PROJECT_ID"
 fi
 
-# Guardar las variables del laboratorio en ../env.sh (fuera de la carpeta de Terraform)
-cat > ../env.sh << EOF
-export PROJECT_ID="$PROJECT_ID"
-export USER_EMAIL="$(gcloud config get-value account 2>/dev/null)"
-export REGION="us-central1"
-export ZONE="us-central1-a"
-EOF
-source ../env.sh
-
 gcloud config set project $PROJECT_ID
 
 # Verificar versión de Terraform preinstalada en Cloud Shell
@@ -75,6 +66,15 @@ wget -O - https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/sh
 ?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
   sudo apt update && sudo apt install terraform
   bash
+
+# Guardar las variables del laboratorio en ../env.sh (fuera de la carpeta de Terraform)
+cat > ../env.sh << EOF
+export PROJECT_ID="$PROJECT_ID"
+export USER_EMAIL="$(gcloud config get-value account 2>/dev/null)"
+export REGION="us-central1"
+export ZONE="us-central1-a"
+EOF
+source ../env.sh
 
 # Habilitar las APIs necesarias
 gcloud services enable \
