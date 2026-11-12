@@ -51,6 +51,9 @@ VARS = dict(
     NODO_INICIAL="nodo-web-abcd", UPTIME_ID=f"projects/{P}/uptimeCheckConfigs/abc",
     CHANNEL_ID=f"projects/{P}/notificationChannels/1", PRIMERA_VERSION=f"gs://{P}-b/o#1",
     NEG="k8s1-x", NEG_ZONE="us-central1-a", B="gcf-v2-x",
+    TOPIC="pagos-lab10", SUSCRIPCION="pagos-lab10-dataflow", BUCKET_DATAFLOW=f"gs://{P}-d",
+    BUCKET_CUARENTENA=f"gs://{P}-q", SA_DATAFLOW=f"sa-dataflow-lab10@{P}.iam.gserviceaccount.com",
+    JOB_NAME="escudo-ingesta-lab10", JOB_ID="2026-11-12_00_00_00-123456789",
 )
 
 

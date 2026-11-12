@@ -39,6 +39,9 @@ workshop-gcp/
 │   ├── teoria.md                                          # Playbook 09: Dremel, Colossus, Capacitor, On-demand vs Editions, particiones, Iceberg y vistas
 │   ├── laboratorio.md                                     # Lab 09: Optimización de costos, FinOps, Apache Iceberg y vistas materializadas
 │   └── laboratorio-corto.md                               # Lab 09 corto (40 min): grandes volúmenes de datos, caché, particiones y clústeres
+├── 10-ingesta-streaming-pubsub-dataflow/
+│   ├── teoria.md                                          # Playbook 10: Pub/Sub, Apache Beam, Dataflow, event time, watermarks y patrón dead-letter
+│   └── laboratorio.md                                     # Lab 10: El Escudo de Ingesta — pipeline de pagos en tiempo real con autocuración
 └── tools/
     └── validate_labs.py                                   # Validador automático de los comandos gcloud de todos los laboratorios
 ```
@@ -50,9 +53,9 @@ Cada carpeta de módulo contiene dos archivos fundamentales:
 
 ---
 
-## Mapa del Curso (Clases 01 a 09 Completadas + Siguientes Módulos)
+## Mapa del Curso (Clases 01 a 10 Completadas + Siguientes Módulos)
 
-A continuación se presenta la ruta oficial del curso con los **9 módulos iniciales listos para dictar**:
+A continuación se presenta la ruta oficial del curso con los **10 módulos iniciales listos para dictar**:
 
 | Clase | Módulo / Tema | Enfoque Principal | Estado |
 | :--- | :--- | :--- | :--- |
@@ -65,7 +68,8 @@ A continuación se presenta la ruta oficial del curso con los **9 módulos inici
 | **07** | **[Almacenamiento de Objetos y Bases de Datos](./07-almacenamiento-objetos-bases-datos/)** | Cloud Storage (clases, versionado, lifecycle), Cloud SQL (PostgreSQL) y Cloud Firestore (NoSQL) | ✅ Disponible ([Teoría](./07-almacenamiento-objetos-bases-datos/teoria.md) \| [Lab](./07-almacenamiento-objetos-bases-datos/laboratorio.md)) |
 | **08** | **[Monitoreo, Observabilidad e IaC](./08-monitoreo-observabilidad-iac/)** | Principios de observabilidad (SRE), Cloud Logging, Cloud Monitoring, Uptime Checks y Terraform (IaC) | ✅ Disponible ([Teoría](./08-monitoreo-observabilidad-iac/teoria.md) \| [Lab](./08-monitoreo-observabilidad-iac/laboratorio.md)) |
 | **09** | **[Almacenamiento Analítico con BigQuery](./09-almacenamiento-analitico-bigquery/)** | Arquitectura Dremel + Colossus, Capacitor, On-demand vs Editions, particionamiento, clusterización, Apache Iceberg, vistas autorizadas y materializadas | ✅ Disponible ([Teoría](./09-almacenamiento-analitico-bigquery/teoria.md) \| [Lab](./09-almacenamiento-analitico-bigquery/laboratorio.md) \| [Lab corto](./09-almacenamiento-analitico-bigquery/laboratorio-corto.md)) |
-| **10–16** | **Módulos Avanzados y Especialización** | Balanceo Global/Cloud Armor, Mensajería (Pub/Sub), Pipelines de Datos, IA Generativa (Vertex AI) y Proyecto Final | Próximamente |
+| **10** | **[Ingesta en Tiempo Real con Pub/Sub y Dataflow](./10-ingesta-streaming-pubsub-dataflow/)** | Pub/Sub, Apache Beam, Dataflow streaming, salidas laterales, cuarentena (dead-letter), autocuración y Storage Write API | ✅ Disponible ([Teoría](./10-ingesta-streaming-pubsub-dataflow/teoria.md) \| [Lab](./10-ingesta-streaming-pubsub-dataflow/laboratorio.md)) |
+| **11–16** | **Módulos Avanzados y Especialización** | Balanceo Global/Cloud Armor, IA Generativa (Vertex AI) y Proyecto Final | Próximamente |
 
 ---
 
