@@ -4,6 +4,9 @@
 - **Nivel**: Intermedio / Analítica de Datos y FinOps
 - **Entorno de trabajo**: **Google Cloud Shell (`bq`, `gcloud`, `python3`)** + Verificaciones visuales en **BigQuery Studio**
 
+> [!TIP]
+> ¿Tienes solo 40 minutos? Usa la [versión corta de este laboratorio](./laboratorio-corto.md): consultas sobre grandes volúmenes de datos, caché, particionamiento y clusterización.
+
 ---
 
 ## 1. Objetivo del Laboratorio

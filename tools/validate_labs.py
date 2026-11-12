@@ -109,7 +109,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--no-run", action="store_true", help="no ejecutar comandos contra la API")
     args = ap.parse_args()
-    labs = sorted(ROOT.glob("*/laboratorio.md"))
+    labs = sorted(ROOT.glob("*/laboratorio*.md"))
     problems = 0
 
     print("== 1. Sintaxis bash (bash -n)")

@@ -37,7 +37,8 @@ workshop-gcp/
 │   └── laboratorio.md                                     # Lab 08: Despliegue declarativo con Terraform, logs JSON, métricas, sinks y Uptime Checks
 ├── 09-almacenamiento-analitico-bigquery/
 │   ├── teoria.md                                          # Playbook 09: Dremel, Colossus, Capacitor, On-demand vs Editions, particiones, Iceberg y vistas
-│   └── laboratorio.md                                     # Lab 09: Optimización de costos, FinOps, Apache Iceberg y vistas materializadas
+│   ├── laboratorio.md                                     # Lab 09: Optimización de costos, FinOps, Apache Iceberg y vistas materializadas
+│   └── laboratorio-corto.md                               # Lab 09 corto (40 min): grandes volúmenes de datos, caché, particiones y clústeres
 └── tools/
     └── validate_labs.py                                   # Validador automático de los comandos gcloud de todos los laboratorios
 ```
@@ -63,7 +64,7 @@ A continuación se presenta la ruta oficial del curso con los **9 módulos inici
 | **06** | **[Orquestación de Contenedores con GKE](./06-orquestacion-contenedores-gke/)** | Arquitectura Kubernetes, GKE Autopilot vs Standard, Pods, Deployments, Services, Secrets, Ingress y HPA | ✅ Disponible ([Teoría](./06-orquestacion-contenedores-gke/teoria.md) \| [Lab](./06-orquestacion-contenedores-gke/laboratorio.md)) |
 | **07** | **[Almacenamiento de Objetos y Bases de Datos](./07-almacenamiento-objetos-bases-datos/)** | Cloud Storage (clases, versionado, lifecycle), Cloud SQL (PostgreSQL) y Cloud Firestore (NoSQL) | ✅ Disponible ([Teoría](./07-almacenamiento-objetos-bases-datos/teoria.md) \| [Lab](./07-almacenamiento-objetos-bases-datos/laboratorio.md)) |
 | **08** | **[Monitoreo, Observabilidad e IaC](./08-monitoreo-observabilidad-iac/)** | Principios de observabilidad (SRE), Cloud Logging, Cloud Monitoring, Uptime Checks y Terraform (IaC) | ✅ Disponible ([Teoría](./08-monitoreo-observabilidad-iac/teoria.md) \| [Lab](./08-monitoreo-observabilidad-iac/laboratorio.md)) |
-| **09** | **[Almacenamiento Analítico con BigQuery](./09-almacenamiento-analitico-bigquery/)** | Arquitectura Dremel + Colossus, Capacitor, On-demand vs Editions, particionamiento, clusterización, Apache Iceberg, vistas autorizadas y materializadas | ✅ Disponible ([Teoría](./09-almacenamiento-analitico-bigquery/teoria.md) \| [Lab](./09-almacenamiento-analitico-bigquery/laboratorio.md)) |
+| **09** | **[Almacenamiento Analítico con BigQuery](./09-almacenamiento-analitico-bigquery/)** | Arquitectura Dremel + Colossus, Capacitor, On-demand vs Editions, particionamiento, clusterización, Apache Iceberg, vistas autorizadas y materializadas | ✅ Disponible ([Teoría](./09-almacenamiento-analitico-bigquery/teoria.md) \| [Lab](./09-almacenamiento-analitico-bigquery/laboratorio.md) \| [Lab corto](./09-almacenamiento-analitico-bigquery/laboratorio-corto.md)) |
 | **10–16** | **Módulos Avanzados y Especialización** | Balanceo Global/Cloud Armor, Mensajería (Pub/Sub), Pipelines de Datos, IA Generativa (Vertex AI) y Proyecto Final | Próximamente |
 
 ---
@@ -123,7 +124,7 @@ python3 tools/validate_labs.py --no-run   # solo sintaxis bash y flags documenta
 
 El validador:
 1. Revisa la sintaxis bash de todos los bloques de código (`bash -n`).
-2. Extrae cada comando `gcloud` de los laboratorios y comprueba que el comando exista y que sus flags estén documentados en `gcloud ... --help`.
+2. Extrae cada comando `gcloud` de los laboratorios (`laboratorio*.md`) y comprueba que el comando exista y que sus flags estén documentados en `gcloud ... --help`.
 3. Ejecuta cada comando contra un **proyecto inexistente**: gcloud valida los argumentos localmente y la API responde 403/404, así que solo se reportan errores de sintaxis o de valores (por ejemplo, `unrecognized arguments`).
 
 > [!NOTE]
