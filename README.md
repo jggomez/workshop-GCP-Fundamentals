@@ -42,6 +42,9 @@ workshop-gcp/
 ├── 10-ingesta-streaming-pubsub-dataflow/
 │   ├── teoria.md                                          # Playbook 10: Pub/Sub, Apache Beam, Dataflow, event time, watermarks y patrón dead-letter
 │   └── laboratorio.md                                     # Lab 10: El Escudo de Ingesta — pipeline de pagos en tiempo real con autocuración
+├── 11-ml-integrado-automl-vertex-ai/
+│   ├── teoria.md                                          # Playbook 11: Vertex AI, BigQuery ML, AutoML y Feature Store (offline y online)
+│   └── laboratorio.md                                     # Lab 11: ML con SQL — regresión, clasificación, clustering, Model Registry y AutoML guiado
 └── tools/
     └── validate_labs.py                                   # Validador automático de los comandos gcloud de todos los laboratorios
 ```
@@ -53,9 +56,9 @@ Cada carpeta de módulo contiene dos archivos fundamentales:
 
 ---
 
-## Mapa del Curso (Clases 01 a 10 Completadas + Siguientes Módulos)
+## Mapa del Curso (Clases 01 a 11 Completadas + Siguientes Módulos)
 
-A continuación se presenta la ruta oficial del curso con los **10 módulos iniciales listos para dictar**:
+A continuación se presenta la ruta oficial del curso con los **11 módulos iniciales listos para dictar**:
 
 | Clase | Módulo / Tema | Enfoque Principal | Estado |
 | :--- | :--- | :--- | :--- |
@@ -69,7 +72,8 @@ A continuación se presenta la ruta oficial del curso con los **10 módulos inic
 | **08** | **[Monitoreo, Observabilidad e IaC](./08-monitoreo-observabilidad-iac/)** | Principios de observabilidad (SRE), Cloud Logging, Cloud Monitoring, Uptime Checks y Terraform (IaC) | ✅ Disponible ([Teoría](./08-monitoreo-observabilidad-iac/teoria.md) \| [Lab](./08-monitoreo-observabilidad-iac/laboratorio.md)) |
 | **09** | **[Almacenamiento Analítico con BigQuery](./09-almacenamiento-analitico-bigquery/)** | Arquitectura Dremel + Colossus, Capacitor, On-demand vs Editions, particionamiento, clusterización, Apache Iceberg, vistas autorizadas y materializadas | ✅ Disponible ([Teoría](./09-almacenamiento-analitico-bigquery/teoria.md) \| [Lab](./09-almacenamiento-analitico-bigquery/laboratorio.md) \| [Lab corto](./09-almacenamiento-analitico-bigquery/laboratorio-corto.md)) |
 | **10** | **[Ingesta en Tiempo Real con Pub/Sub y Dataflow](./10-ingesta-streaming-pubsub-dataflow/)** | Pub/Sub, Apache Beam, Dataflow streaming, salidas laterales, cuarentena (dead-letter), autocuración y Storage Write API | ✅ Disponible ([Teoría](./10-ingesta-streaming-pubsub-dataflow/teoria.md) \| [Lab](./10-ingesta-streaming-pubsub-dataflow/laboratorio.md)) |
-| **11–16** | **Módulos Avanzados y Especialización** | Balanceo Global/Cloud Armor, IA Generativa (Vertex AI) y Proyecto Final | Próximamente |
+| **11** | **[Machine Learning Integrado y AutoML en Vertex AI](./11-ml-integrado-automl-vertex-ai/)** | BigQuery ML (regresión, clasificación, clustering), `TRANSFORM`, explicabilidad, Model Registry con versiones, AutoML y Feature Store | ✅ Disponible ([Teoría](./11-ml-integrado-automl-vertex-ai/teoria.md) \| [Lab](./11-ml-integrado-automl-vertex-ai/laboratorio.md)) |
+| **12–16** | **Módulos Avanzados y Especialización** | Balanceo Global/Cloud Armor, IA Generativa (Vertex AI) y Proyecto Final | Próximamente |
 
 ---
 

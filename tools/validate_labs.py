@@ -54,6 +54,8 @@ VARS = dict(
     TOPIC="pagos-lab10", SUSCRIPCION="pagos-lab10-dataflow", BUCKET_DATAFLOW=f"gs://{P}-d",
     BUCKET_CUARENTENA=f"gs://{P}-q", SA_DATAFLOW=f"sa-dataflow-lab10@{P}.iam.gserviceaccount.com",
     JOB_NAME="escudo-ingesta-lab10", JOB_ID="2026-11-12_00_00_00-123456789",
+    BQ_LOCATION="US", DATASET="lab11_ml", MODELO_REGISTRY="clasificador-ingresos-lab11",
+    DATASET_AUTOML="census_lab11", ID_AUTOML="1234567890",
 )
 
 
